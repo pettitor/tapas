@@ -18,7 +18,8 @@ class Options(usage.Options):
         ('media_engine', 'm',  'gst', 'Player type [gst|nodec|fake]'),
         ('log_sub_dir', 'l', None, 'Log sub-directory'),
         ('stress_test', 's', False, 'Enable stress test. Switch level for each segment, cyclically.'),
-        ('bw_var', 'b', None, 'Set mean bandwidth and bandwidth variation (stdd) per segment comma separted in kbps, e.g. 600,60.')
+        ('bw_var', 'b', None, 'Set mean bandwidth and bandwidth variation (stdd) per segment comma separted in kbps, e.g. 600,60.'),
+        ('min_queue_time', 'i', 1, 'Set min queue time in seconds before playback starts.')
     ]
 options = Options()
 try:
@@ -38,14 +39,14 @@ def select_player():
     if options['media_engine'] == 'gst':
         #gst_init()
         from media_engines.GstMediaEngine import GstMediaEngine
-        media_engine = GstMediaEngine(decode_video=True, min_queue_time=10)
+        media_engine = GstMediaEngine(decode_video=True, min_queue_time=options['min_queue_time'])
     elif options['media_engine'] == 'nodec':
         #gst_init()
         from media_engines.GstMediaEngine import GstMediaEngine
-        media_engine = GstMediaEngine(decode_video=False, min_queue_time=10)
+        media_engine = GstMediaEngine(decode_video=False, min_queue_time=options['min_queue_time'])
     elif options['media_engine'] == 'fake':
         from media_engines.FakeMediaEngine import FakeMediaEngine
-        media_engine = FakeMediaEngine(min_queue_time=10)
+        media_engine = FakeMediaEngine(min_queue_time=options['min_queue_time'])
     else:
         print 'Error. Unknown Media Engine'
         sys.exit()
