@@ -18,6 +18,7 @@ class Options(usage.Options):
         ('media_engine', 'm',  'gst', 'Player type [gst|nodec|fake]'),
         ('log_sub_dir', 'l', None, 'Log sub-directory'),
         ('stress_test', 's', False, 'Enable stress test. Switch level for each segment, cyclically.'),
+        ('bw_var', 'b', None, 'Set mean bandwidth and bandwidth variation (stdd) per segment comma separted in kbps, e.g. 600,60.')
     ]
 options = Options()
 try:
@@ -30,21 +31,21 @@ except Exception, e:
 def select_player():
     log.startLogging(sys.stdout)
 
-    persistent_conn = True
-    check_warning_buffering=True
+    persistent_conn = False
+    check_warning_buffering=False
     
     #MediaEngine
     if options['media_engine'] == 'gst':
         #gst_init()
         from media_engines.GstMediaEngine import GstMediaEngine
-        media_engine = GstMediaEngine(decode_video=True)
+        media_engine = GstMediaEngine(decode_video=True, min_queue_time=10)
     elif options['media_engine'] == 'nodec':
         #gst_init()
         from media_engines.GstMediaEngine import GstMediaEngine
-        media_engine = GstMediaEngine(decode_video=False)
+        media_engine = GstMediaEngine(decode_video=False, min_queue_time=10)
     elif options['media_engine'] == 'fake':
         from media_engines.FakeMediaEngine import FakeMediaEngine
-        media_engine = FakeMediaEngine()
+        media_engine = FakeMediaEngine(min_queue_time=10)
     else:
         print 'Error. Unknown Media Engine'
         sys.exit()
@@ -86,14 +87,25 @@ def select_player():
     #StartPlayer
     from TapasPlayer import TapasPlayer
     player = TapasPlayer(controller=controller, parser=parser, media_engine=media_engine,
-        log_sub_dir=log_sub_dir, log_period=0.1,
-        max_buffer_time=80,
+        log_sub_dir=log_sub_dir, log_period=1,
+        max_buffer_time=40,
         inactive_cycle=1, initial_level=0,
         use_persistent_connection=persistent_conn,
         check_warning_buffering=check_warning_buffering,
         stress_test=options['stress_test'])
+
+    if options['bw_var'] is not None:
+        player.setBandwidthVariation(options['bw_var'])
+
     #print 'Ready to play'
     player.play()
+
+    from twisted.internet import task
+    def check_stop_flag():
+        if player.isTerminated():
+            reactor.stop()
+    lc = task.LoopingCall(check_stop_flag)
+    lc.start(3)
     
     try:
         reactor.run()

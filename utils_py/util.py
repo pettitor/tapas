@@ -11,7 +11,9 @@ DEBUG_LEVEL = int(os.environ.get('DEBUG', -1))
 def debug(level, s, *args):
     if DEBUG_LEVEL >= level or level == 0:
         #print '%s [%s]' %(strftime('%Y-%m-%d-%H.%M.%S'), __name__),
-        print s %args
+        ts = '%d ' % int(time()*10)
+        b = s %args
+        print ts + b
 
 ### get HTTP page
 from twisted.web import client
@@ -532,18 +534,18 @@ class ProcessStats(object):
             cpu_system = (t[1]-self._last_cpu_s)*100./delta_t
         self._last_cpu_u, self._last_cpu_s, self._last_t = t[0], t[1], t[-1]
         # memory
-        m = self.process.get_memory_info()
+        m = self.process.memory_info()
         d = dict(
             cpu_percent=cpu_user+cpu_system,
             cpu_user_percent=cpu_user,
             cpu_system_percent=cpu_system,
-            memory_percent=self.process.get_memory_percent(),
+            memory_percent=self.process.memory_percent(),
             memory_rss=m.rss, 
             memory_vms=m.vms,
             #open_files=self.process.get_num_fds(),
             #open_files_max=self.process.get_rlimit(psutil.RLIMIT_NOFILE)[1],
-            threads=self.process.get_num_threads(),
-            connections=self.process.get_connections().__len__(),
+            threads=self.process.num_threads(),
+            connections=self.process.connections().__len__(),
         )
         # temp
         if self._calc_temp:

@@ -81,6 +81,7 @@ class BaseParser(object):
         '''
         return self.playlists_type
 
+
     #FIXME on level switch for mp4 segments
     def _getCapsDemuxer(self):
         return self.caps_demuxer

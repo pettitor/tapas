@@ -58,7 +58,7 @@ class HLS_mpegtsParser(BaseParser):
                             res = field
                     self.levels.append(dict(rate=vr,resolution=res))
                     cur = dict(url='', 
-                        is_live=True,
+                        is_live=False,
                         segments=[], 
                         start_index=-1, end_index=-1, 
                         duration=0.0)
@@ -140,7 +140,8 @@ class HLS_mpegtsParser(BaseParser):
                         playlist['duration'] += segment_duration
                 elif line.startswith('#EXT-X-ENDLIST'):
                     duration = playlist['duration']
-                    playlist['is_live'] = True
+                    playlist['is_live'] = False
+            
             #print pformat(playlist)
             self.playlists[level] = playlist
             c.callback(1)

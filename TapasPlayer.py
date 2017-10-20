@@ -15,14 +15,18 @@ import time, datetime
 from pprint import pformat
 from utils_py.util import debug, format_bytes, Logger, getPage, send_json, makeJsonUrl, RateCalc, ProcessStats
 from utils_py.connection import parse_url, ClientFactory
+import subprocess
+import signal
+from numpy import random
+import math
 
-DEBUG = 2
+DEBUG = 0 #2
 USER_AGENT = 'Mozilla/5.0 (iPad; PythonHlsPlayer 0.1) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10'
 
 class TapasPlayer(object):
 
     def __init__(self, controller, parser, media_engine, 
-        log_sub_dir='', log_period=0.1,
+        log_sub_dir='', log_period=1,
         max_buffer_time=60,
         inactive_cycle=1, initial_level=0,
         use_persistent_connection=True,
@@ -50,6 +54,7 @@ class TapasPlayer(object):
         #
         self.cur_level = initial_level
         self.cur_index = 0
+        self.cur_dur = 0
         self.enable_stress_test = stress_test #flag to enable stress test, switch level every segment cyclically 
         #
         self.check_warning_buffering = check_warning_buffering #flag to enable check for warning buffering
@@ -69,6 +74,11 @@ class TapasPlayer(object):
         self.queuedTime = 0.0
         #
         self.proc_stats = ProcessStats()
+
+        self.terminated = False
+
+        self.mu = None
+        self.sigma = None
 
         #Initialize the parameters passed at the controller after the download of every segment
         self.feedback = dict(queued_bytes=0,
@@ -191,6 +201,18 @@ class TapasPlayer(object):
         '''
         self.cur_index = index
 
+    def getCurrentSegmentDuration(self):
+        '''
+        Gets index of the current segment of the sub-playlist
+        '''
+        return self.cur_dur
+
+    def setCurrentSegmentDuration(self, dur):
+        '''
+        Gets index of the current segment of the sub-playlist
+        '''
+        self.cur_dur = dur
+
     def getCurrentRate(self):
         '''
         Gets current video quality level rate in B/s
@@ -311,6 +333,9 @@ class TapasPlayer(object):
             # if video is vod
             else:
                 debug(DEBUG, '%s fetchNextSegment last index', self)
+                #process = subprocess.Popen(os.getpid())
+                #process.send_signal(signal.SIGINT)
+                #sys.exit()
             return
         cur_index=self.getCurrentSegmentIndex()
         levels = self.parser.getLevels()
@@ -332,10 +357,13 @@ class TapasPlayer(object):
             idle_duration = 0.0 #fetch segment after the last segment download is completed
         else:
             idle_duration = self.controller.getIdleDuration()
+        # if bandwidth is varried per segment set new bandwidth
+        if self.mu is not None and self.sigma is not None:
+            self.setNewBandwidth()
         # load the next segment
-        reactor.callLater(idle_duration, self.startDownload, url_segment, byterange)
+        reactor.callLater(idle_duration, self.startDownload, url_segment, cur_index, byterange)
 
-    def startDownload(self, url, byterange=''):
+    def startDownload(self, url, index, byterange=''):
         '''
         Starts the segment download and set the timestamp of start segment download
 
@@ -379,11 +407,15 @@ class TapasPlayer(object):
         self.downloaded_segments += 1
         debug(DEBUG, '%s __got_request: bwe: %s/s (fragment size: %s)', self, 
             format_bytes(self.bwe), format_bytes(len(data)))
-        self.queuedTime = self.media_engine.getQueuedTime() + self.parser.getFragmentDuration()
+        playlist = self.parser.playlists[self.getCurrentLevel()]
+        #self.queuedTime = self.media_engine.getQueuedTime() + self.parser.getFragmentDuration()
+        self.queuedTime = self.media_engine.getQueuedTime() + playlist['segments'][self.getCurrentSegmentIndex()]['dur']
         self.queuedBytes = self.media_engine.getQueuedBytes() + len(data)
-        self.media_engine.pushData(data, self.parser.getFragmentDuration(), self.getCurrentLevel(), self.parser._getCapsDemuxer())
+        self.media_engine.pushData(data, playlist['segments'][self.getCurrentSegmentIndex()]['dur'], self.getCurrentLevel(), self.parser._getCapsDemuxer())
         del data
         self.cur_index += 1
+        if self.getCurrentSegmentIndex() <= playlist['end_index']:
+            self.setCurrentSegmentDuration(playlist['segments'][self.getCurrentSegmentIndex()]['dur'])
         #Do something before calculating new control action
         self._onNewSegment()
         #Passing player parameters at the controller to calculate the control action
@@ -595,6 +627,9 @@ class TapasPlayer(object):
         else:
             self.controller.onPaused()
             self.t_paused = time.time()
+            playlist = self.parser.playlists[self.getCurrentLevel()]
+            if self.getCurrentSegmentIndex() > playlist['end_index']:
+                self.terminated = True
 
     #callback
     def _updatePlaylistDone(self, data):
@@ -608,3 +643,29 @@ class TapasPlayer(object):
             self.fetchNextSegment()
         else:
             reactor.callLater(self.parser.getFragmentDuration(), self.fetchNextSegment)
+
+    def isTerminated(self):
+        '''
+        returns if video has ended
+        '''
+        return self.terminated
+
+    def setBandwidthVariation(self, bwstr):
+        '''
+        sets bandwidth variation per segment
+        '''
+        m = float(bwstr.split(',')[0])
+        s = float(bwstr.split(',')[1])
+        v = s*s
+        if v>0:
+          self.mu = math.log((m*m)/math.sqrt(v+m*m))
+          self.sigma = math.sqrt(math.log(v/(m*m)+1))
+
+    def setNewBandwidth(self):
+        '''
+        sets bandwidth for next segment
+        '''
+        path='/home/valli/workspace/HASDocker/shaping/'
+        os.system('echo ' + str(int(random.lognormal(self.mu, self.sigma))) + ' > ' + path + 'value')
+        os.system('cd ' + path + ';sudo ./rate.sh')
+        

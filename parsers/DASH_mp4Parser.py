@@ -67,6 +67,7 @@ class DASH_mp4Parser(BaseParser):
             #PT0H3M1.63S
             duration = duration[2:]
             _h = duration.split("H")
+            #TODOif _h[1] ...
             h = float(_h[0])*3600
             _m = _h[1].split("M")
             m = float(_m[0])*60
