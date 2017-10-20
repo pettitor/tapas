@@ -111,13 +111,13 @@ demux.
         if self.getQueuedTime() >= self.min_queue_time and self.status == self.PAUSED:
             self.pipeline.set_state(gst.STATE_PLAYING)
             self.status = self.PLAYING
-            self.emit('status-changed')
             debug(DEBUG, '%s running', self)
+            self.emit('status-changed')
         elif self.getQueuedTime() == 0 and self.status == self.PLAYING:
             self.pipeline.set_state(gst.STATE_PAUSED)
             self.status = self.PAUSED
-            self.emit('status-changed')
             debug(DEBUG, '%s underrun', self)
+            self.emit('status-changed')
         reactor.callLater(0.1, self.onRunning)
 
     def stop(self):

@@ -35,18 +35,22 @@ def select_player():
     persistent_conn = False
     check_warning_buffering=False
     
+    mqtime = 1
+    if float(options['min_queue_time']) >= 0:
+        mqtime=float(options['min_queue_time'])
+
     #MediaEngine
     if options['media_engine'] == 'gst':
         #gst_init()
         from media_engines.GstMediaEngine import GstMediaEngine
-        media_engine = GstMediaEngine(decode_video=True, min_queue_time=options['min_queue_time'])
+        media_engine = GstMediaEngine(decode_video=True, min_queue_time=mqtime)
     elif options['media_engine'] == 'nodec':
         #gst_init()
         from media_engines.GstMediaEngine import GstMediaEngine
-        media_engine = GstMediaEngine(decode_video=False, min_queue_time=options['min_queue_time'])
+        media_engine = GstMediaEngine(decode_video=False, min_queue_time=mqtime)
     elif options['media_engine'] == 'fake':
         from media_engines.FakeMediaEngine import FakeMediaEngine
-        media_engine = FakeMediaEngine(min_queue_time=options['min_queue_time'])
+        media_engine = FakeMediaEngine(min_queue_time=mqtime)
     else:
         print 'Error. Unknown Media Engine'
         sys.exit()

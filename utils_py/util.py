@@ -11,7 +11,7 @@ DEBUG_LEVEL = int(os.environ.get('DEBUG', -1))
 def debug(level, s, *args):
     if DEBUG_LEVEL >= level or level == 0:
         #print '%s [%s]' %(strftime('%Y-%m-%d-%H.%M.%S'), __name__),
-        ts = '%d ' % int(time()*10)
+        ts = '%d ' % int(time()*100)
         b = s %args
         print ts + b
 
