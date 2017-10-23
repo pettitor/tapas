@@ -665,7 +665,7 @@ class TapasPlayer(object):
         '''
         sets bandwidth for next segment
         '''
-        path='/home/vagrant/has-evalvm/shaping/'
+        path='has-evalvm/shaping/'
         os.system('echo ' + str(int(random.lognormal(self.mu, self.sigma))) + ' > ' + path + 'value')
         os.system('cd ' + path + ';sudo ./rate.sh')
         
