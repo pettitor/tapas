@@ -19,7 +19,8 @@ class Options(usage.Options):
         ('log_sub_dir', 'l', None, 'Log sub-directory'),
         ('stress_test', 's', False, 'Enable stress test. Switch level for each segment, cyclically.'),
         ('bw_var', 'b', None, 'Set mean bandwidth and bandwidth variation (stdd) per segment comma separted in kbps, e.g. 600,60.'),
-        ('min_queue_time', 'i', 1, 'Set min queue time in seconds before playback starts.')
+        ('min_queue_time', 'i', 1, 'Set min queue time in seconds before playback starts.'),
+        ('max_buffer_time', 'p', 40, 'Set max buffer time in seconds.')
     ]
 options = Options()
 try:
@@ -89,7 +90,7 @@ def select_player():
     from TapasPlayer import TapasPlayer
     player = TapasPlayer(controller=controller, parser=parser, media_engine=media_engine,
         log_sub_dir=log_sub_dir, log_period=1,
-        max_buffer_time=40,
+        max_buffer_time=options['max_buffer_time'],
         inactive_cycle=1, initial_level=0,
         use_persistent_connection=persistent_conn,
         check_warning_buffering=check_warning_buffering,
