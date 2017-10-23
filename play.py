@@ -90,11 +90,15 @@ def select_player():
         print 'Error. Unknown Parser'
         sys.exit()
 
+    p = 40
+    if float(options['max_buffer_time']) >= 0:
+        p=float(options['max_buffer_time'])
+
     #StartPlayer
     from TapasPlayer import TapasPlayer
     player = TapasPlayer(controller=controller, parser=parser, media_engine=media_engine,
         log_sub_dir=log_sub_dir, log_period=1,
-        max_buffer_time=options['max_buffer_time'],
+        max_buffer_time=p,
         inactive_cycle=1, initial_level=0,
         use_persistent_connection=persistent_conn,
         check_warning_buffering=check_warning_buffering,
