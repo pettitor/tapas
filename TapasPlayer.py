@@ -333,6 +333,7 @@ class TapasPlayer(object):
             # if video is vod
             else:
                 debug(DEBUG, '%s fetchNextSegment last index', self)
+		self.terminated = True
                 #process = subprocess.Popen(os.getpid())
                 #process.send_signal(signal.SIGINT)
                 #sys.exit()
