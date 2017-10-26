@@ -42,9 +42,9 @@ def getPage(url, contextFactory=None, *args, **kwargs):
         from twisted.internet import ssl
         if contextFactory is None:
             contextFactory = ssl.ClientContextFactory()
-        reactor.connectSSL(host, port, factory, contextFactory)
+        reactor.connectSSL(host, port, factory, contextFactory, timeout=240)
     else:
-        reactor.connectTCP(host, port, factory)
+        reactor.connectTCP(host, port, factory, timeout=240)
     return factory
 
 ### files usage
