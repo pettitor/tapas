@@ -33,7 +33,7 @@ except Exception, e:
 def select_player():
     log.startLogging(sys.stdout)
 
-    persistent_conn = True
+    persistent_conn = False
     check_warning_buffering=False
     
     mqtime = 1
