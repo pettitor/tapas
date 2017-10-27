@@ -440,15 +440,15 @@ class TapasPlayer(object):
         :param factory: the twisted factory (used without persistent connection)
         '''
         debug(0, '%s playNextGotError url: %s error: %s', self, factory.url, error)
-	playlist = self.parser.playlists[self.getCurrentLevel()]
+#	playlist = self.parser.playlists[self.getCurrentLevel()]
         #self.queuedTime = self.media_engine.getQueuedTime() + self.parser.getFragmentDuration()
-        self.queuedTime = self.media_engine.getQueuedTime() + playlist['segments'][self.getCurrentSegmentIndex()]['dur']
+#        self.queuedTime = self.media_engine.getQueuedTime() + playlist['segments'][self.getCurrentSegmentIndex()]['dur']
 #        self.queuedBytes = self.media_engine.getQueuedBytes() + len(data)
 #        self.media_engine.pushData(data, playlist['segments'][self.getCurrentSegmentIndex()]['dur'], self.getCurrentLevel(), self.parser._getCapsDemuxer())
 #        del data
-        self.cur_index += 1
-        if self.getCurrentSegmentIndex() <= playlist['end_index']:
-            self.setCurrentSegmentDuration(playlist['segments'][self.getCurrentSegmentIndex()]['dur'])
+#        self.cur_index += 1
+#        if self.getCurrentSegmentIndex() <= playlist['end_index']:
+#            self.setCurrentSegmentDuration(playlist['segments'][self.getCurrentSegmentIndex()]['dur'])
         # set new level
         self.setLevel(0)
         self.fetchNextSegment()
