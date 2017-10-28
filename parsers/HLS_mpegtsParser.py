@@ -81,6 +81,7 @@ class HLS_mpegtsParser(BaseParser):
         # error handling
         def got_error(e):
             debug(0, '%s loadHlsPlaylist error: %s', self, e)
+            self.loadPlaylist()
         #
         d = getPage(self.url, agent=USER_AGENT)
         d.deferred.addCallback(got_page, d)
