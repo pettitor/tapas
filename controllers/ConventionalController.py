@@ -42,7 +42,7 @@ class ConventionalController(BaseController):
         tau = self.feedback['fragment_duration']
         x = cur * tau / T
         y = self.__ewma_filter(x) 
-        self.setIdleDuration(tau-T)
+        #self.setIdleDuration(tau-T)
         debug(DEBUG, "%s calcControlAction: y: %s/s x: %s/s T: %.2f", self, 
             format_bytes(y), format_bytes(x), T)
         return y

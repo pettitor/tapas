@@ -333,7 +333,7 @@ class TapasPlayer(object):
             # if video is vod
             else:
                 debug(DEBUG, '%s fetchNextSegment last index', self)
-		self.terminated = True
+                self.terminated = True
                 #process = subprocess.Popen(os.getpid())
                 #process.send_signal(signal.SIGINT)
                 #sys.exit()
@@ -354,10 +354,10 @@ class TapasPlayer(object):
                 format_bytes(float(levels[self.getCurrentLevel()]['rate'])),
                 self.getCurrentSegmentIndex(), 
                 playlist['end_index'], url_segment)
-        if self.controller.isBuffering():
+        if self.controller.feedback['queued_time'] < self.controller.feedback['max_buffer_time']:
             idle_duration = 0.0 #fetch segment after the last segment download is completed
         else:
-            idle_duration = self.controller.getIdleDuration()
+            idle_duration = self.controller.feedback['queued_time'] - self.controller.feedback['max_buffer_time']
         # if bandwidth is varried per segment set new bandwidth
         if self.mu is not None and self.sigma is not None:
             self.setNewBandwidth()

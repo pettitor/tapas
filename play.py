@@ -62,6 +62,7 @@ def select_player():
     if options['controller'] == 'conventional':
         from controllers.ConventionalController import ConventionalController
         controller = ConventionalController()
+        controller.setIdleDuration(4)
     elif options['controller'] == 'tobasco':
         from controllers.TOBASCOController import TOBASCOController
         controller = TOBASCOController()
