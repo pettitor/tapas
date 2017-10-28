@@ -119,8 +119,9 @@ def select_player():
     
     try:
         reactor.run()
-    except Exception, e:
-        pass
+    except Exception as e:
+        print str(e)
+	player.terminated = True
 
 if __name__ == '__main__':
     select_player()
