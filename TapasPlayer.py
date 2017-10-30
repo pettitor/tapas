@@ -371,7 +371,7 @@ class TapasPlayer(object):
         :param url: segment url
         :param byterange: segment byterange (logical segmentation of video level)
         '''
-        debug(DEBUG+1, '%s startDownload %s (byterange %s)', self, url, byterange)
+        debug(DEBUG, '%s startDownload index: %d %s (byterange=%s)', self, self.getCurrentSegmentIndex(), url, byterange)
         # start download
         if self.use_persistent_connection:
             # start a new connection
