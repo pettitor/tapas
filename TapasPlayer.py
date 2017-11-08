@@ -357,7 +357,7 @@ class TapasPlayer(object):
         if self.controller.feedback['queued_time'] < self.controller.feedback['max_buffer_time']:
             idle_duration = 0.0 #fetch segment after the last segment download is completed
         else:
-            idle_duration = self.controller.feedback['queued_time'] - self.controller.feedback['max_buffer_time']
+            idle_duration = max(0.0, self.controller.feedback['queued_time'] - self.controller.feedback['max_buffer_time'] - self.controller.feedback['last_download_time'])
         # if bandwidth is varried per segment set new bandwidth
         if self.mu is not None and self.sigma is not None:
             self.setNewBandwidth()
